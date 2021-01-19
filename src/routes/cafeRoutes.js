@@ -17,4 +17,7 @@ router
   .patch(cafeController.updateCafe)
   .delete(cafeController.deleteCafe);
 
+router.use(authController.protect);
+router.post('/:cafe/favorite', cafeController.favorite);
+
 export default router;

@@ -21,18 +21,32 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       minlength: 8,
+      select: false,
     },
     confirmPassword: {
       type: String,
       minlength: 8,
+      select: false,
     },
     email: String,
+    favorites: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Cafe',
+        required: [true, 'id must belong to a cafe'],
+      },
+    ],
     role: {
       type: String,
       enum: ['user', 'admin', 'superAdmin'],
       default: 'user',
     },
     location: [pointSchema],
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -41,12 +55,12 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// virtuals
-userSchema.virtual('favorite', {
-  ref: 'Cafe',
-  localField: '_id',
-  foreignField: 'favoriteTo',
-});
+// // virtuals
+// userSchema.virtual('favorites', {
+//   ref: 'Favorite',
+//   localField: '_id',
+//   foreignField: 'user',
+// });
 
 userSchema.pre('save', async function (next) {
   // Only run this function if password is actually modified
@@ -59,6 +73,24 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+// userSchema.pre(/^find/, function (next) {
+//   this.populate({
+//     path: 'favorites',
+//     select: 'name',
+//   });
+
+//   return next();
+// });
+
+userSchema.methods.FavoriteList = async function (cafeId) {
+  if (this.favorites.includes(cafeId)) {
+    this.favorites.pull(cafeId);
+  } else {
+    this.favorites.push(cafeId);
+  }
+  return this.save({ validateBeforeSave: false });
+};
 
 userSchema.methods.correctPassword = async function (
   bodyPassword,

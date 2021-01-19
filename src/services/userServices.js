@@ -18,6 +18,25 @@ export default class UserService {
     return user;
   }
 
+  async getUser(id) {
+    const user = await UserModal.findOne({ _id: id }).select('-password');
+    if (!user) {
+      return null;
+    }
+    return user;
+  }
+
+  async getFavoriteList(id) {
+    const user = await UserModal.findOne({ _id: id }).populate({
+      path: 'favorites',
+      select: '_id name primaryImage',
+    });
+    if (!user) {
+      return null;
+    }
+    return user.favorites;
+  }
+
   async checkUser(id) {
     //3) Check if user still exists
     const currentUser = await UserModal.findById(id);

@@ -27,6 +27,12 @@ const cafeSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  likedBy: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+    },
+  ],
   ratingAverage: {
     type: Number,
     default: 3.5,
@@ -42,5 +48,14 @@ cafeSchema.pre('save', function (next) {
   this.slug = slugfiy(this.name, { lower: true });
   next();
 });
+
+cafeSchema.methods.LikeList = async function (userId) {
+  if (this.likedBy.includes(userId)) {
+    this.likedBy.pull(userId);
+  } else {
+    this.likedBy.push(userId);
+  }
+  return this.save({ validateBeforeSave: false });
+};
 
 export default mongoose.model('Cafe', cafeSchema, 'cafes');

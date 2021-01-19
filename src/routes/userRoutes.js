@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authController } from '../controllers';
+import { authController, userController } from '../controllers';
 
 const router = Router();
 
@@ -8,8 +8,7 @@ router.route('/login').post(authController.login);
 router.route('/refreshToken').post(authController.refreshJWTToken);
 
 router.use(authController.protect);
-router.route('/test').get((req, res) => {
-  res.send('test');
-});
+router.route('/me').get(userController.me);
+router.route('/favorites').get(userController.favoritesList);
 
 export default router;

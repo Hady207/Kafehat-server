@@ -3,15 +3,17 @@ import Cafe from './Cafe';
 
 const favoriteSchema = new mongoose.Schema(
   {
-    cafe: {
-      type: mongoose.Schema.ObjectId,
-      ref: 'Cafe',
-      required: [true, 'Review must belong to a cafe'],
-    },
+    cafe: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Cafe',
+        required: [true, 'id must belong to a cafe'],
+      },
+    ],
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
-      required: [true, 'Review must belong to a user'],
+      required: [true, 'id must belong to a user'],
     },
   },
   {

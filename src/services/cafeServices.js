@@ -13,7 +13,6 @@ export default class CafeService {
   async getAllCafes() {
     try {
       const cafes = await Cafe.find({});
-      console.log('-----', cafes);
       return cafes;
     } catch (error) {
       console.log(error);
