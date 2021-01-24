@@ -11,11 +11,16 @@ router
     authController.restrictTo('superAdmin'),
     cafeController.createCafe
   );
+
 router
   .route('/:cafe')
   .get(cafeController.getCafe)
   .patch(cafeController.updateCafe)
   .delete(cafeController.deleteCafe);
+
+router
+  .route('/cafes-within/:distance/center/:latlng/unit/:unit')
+  .get(cafeController.getCafesWithin);
 
 router.use(authController.protect);
 router.post('/:cafe/favorite', cafeController.favorite);

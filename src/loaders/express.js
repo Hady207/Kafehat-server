@@ -1,7 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 
-import { userRoutes, cafeRoutes } from '../routes';
+import { userRoutes, cafeRoutes, reviewRoutes } from '../routes';
 import globalErrorHandler from '../controllers/errorController';
 import { AppError } from '../services';
 
@@ -21,6 +21,7 @@ const expressLoader = async ({ app }) => {
   // ...More middlewares
 
   app.use('/api/v1/cafes', cafeRoutes);
+  app.use('/api/v1/reviews', reviewRoutes);
   app.use('/api/v1/users', userRoutes);
 
   app.all('*', (req, res, next) => {

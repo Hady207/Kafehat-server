@@ -13,11 +13,14 @@ const pointSchema = new mongoose.Schema({
   },
 });
 
+pointSchema.index({ index: '2dsphere' }); // Create a special 2dsphere index on `City.location`
+
 const userSchema = new mongoose.Schema(
   {
     profileImage: String,
     username: String,
-    phoneNumber: String,
+    name: String,
+    phone: String,
     password: {
       type: String,
       minlength: 8,
@@ -55,13 +58,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// // virtuals
-// userSchema.virtual('favorites', {
-//   ref: 'Favorite',
-//   localField: '_id',
-//   foreignField: 'user',
-// });
-
 userSchema.pre('save', async function (next) {
   // Only run this function if password is actually modified
   if (!this.isModified('password')) return next();
@@ -73,15 +69,6 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
-
-// userSchema.pre(/^find/, function (next) {
-//   this.populate({
-//     path: 'favorites',
-//     select: 'name',
-//   });
-
-//   return next();
-// });
 
 userSchema.methods.FavoriteList = async function (cafeId) {
   if (this.favorites.includes(cafeId)) {

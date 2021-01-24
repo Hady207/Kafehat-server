@@ -1,10 +1,20 @@
 import mongoose from 'mongoose';
 import Cafe from './Cafe';
 
+const commentsSchema = new mongoose.Schema({
+  comment: String,
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: [true, 'Review must belong to a user'],
+  },
+});
+
 const reviewSchema = new mongoose.Schema(
   {
     review: { type: String, required: [true, 'Review can not be empty!'] },
     rating: { type: Number, required: true, min: 1, max: 5 },
+    comments: [commentsSchema],
     cafe: {
       type: mongoose.Schema.ObjectId,
       ref: 'Cafe',
@@ -23,16 +33,25 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
-// reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+reviewSchema.index({ review: 1, user: 1 }, { unique: true });
 
 reviewSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
     select: 'name profileImage ',
   });
-  // this.populate('user', 'name');
+
   return next();
 });
+
+reviewSchema.methods.comment = async function (comment) {
+  if (this.comments.includes(comment)) {
+    this.comments.pull(comment);
+  } else {
+    this.comments.push(comment);
+  }
+  return this.save({ validateBeforeSave: false });
+};
 
 // statics methods are called on the model
 reviewSchema.statics.calcAverageRatings = async function (cafeId) {
@@ -50,12 +69,12 @@ reviewSchema.statics.calcAverageRatings = async function (cafeId) {
   ]);
 
   if (stats.length > 0) {
-    await Cafe.findByIdAndUpdate(universityId, {
+    await Cafe.findByIdAndUpdate(cafeId, {
       ratingQuantity: stats[0].nRating,
       ratingAverage: stats[0].avgRating,
     });
   } else {
-    await Cafe.findByIdAndUpdate(universityId, {
+    await Cafe.findByIdAndUpdate(cafeId, {
       ratingsQuantity: 0,
       ratingsAverage: 3.5,
     });

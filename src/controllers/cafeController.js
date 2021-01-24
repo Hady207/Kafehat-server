@@ -19,7 +19,6 @@ exports.createCafe = catchAsync(async (req, res, next) => {
 
 exports.getCafes = catchAsync(async (req, res, next) => {
   const cafes = await CafeService.getAllCafes();
-
   createRespond(res, 200, cafes);
 });
 
@@ -32,7 +31,7 @@ exports.getCafe = catchAsync(async (req, res, next) => {
 });
 
 exports.updateCafe = catchAsync(async (req, res, next) => {
-  const updatedCafe = CafeService.updateCafe(req.params.cafe, req.body);
+  const updatedCafe = await CafeService.updateCafe(req.params.cafe, req.body);
   if (!updatedCafe) {
     return next(new AppError('No document found with given credentials', 404));
   }
@@ -40,7 +39,7 @@ exports.updateCafe = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteCafe = catchAsync(async (req, res, next) => {
-  const deletedCafe = CafeService.delete(req.params.cafe);
+  const deletedCafe = await CafeService.delete(req.params.cafe);
   createRespond(res, 204, deletedCafe);
 });
 
@@ -59,4 +58,23 @@ exports.favorite = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
   });
+});
+
+// /cafes-within/:distance/center/:latlng/unit/:unit
+exports.getCafesWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        'Please provide latitude and longitude in the format lat,long',
+        400
+      )
+    );
+  }
+
+  const cafes = await CafeService.cafesWithin(lng, lat, radius);
+  createRespond(res, 200, cafes);
 });

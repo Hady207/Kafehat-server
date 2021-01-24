@@ -11,37 +11,66 @@ const pointSchema = new mongoose.Schema({
     type: [Number],
     required: true,
   },
+  description: String,
 });
 
-const cafeSchema = new mongoose.Schema({
-  primaryImage: { type: String },
-  name: { type: String, required: true },
-  slug: { type: String },
-  album: {
-    type: [String],
-  },
-  desc: {
-    type: String,
-  },
-  ratingQuantity: {
-    type: Number,
-    default: 0,
-  },
-  likedBy: [
-    {
-      type: mongoose.Schema.ObjectId,
-      ref: 'User',
-    },
-  ],
-  ratingAverage: {
-    type: Number,
-    default: 3.5,
-    min: [1, 'Rating must be above 1.0'],
-    max: [5, 'Rating must be below 5.0'],
-    set: (val) => Math.round(val * 10) / 10, // 4.666666, 46.66666, 47, 4.7
-  },
+pointSchema.index({ index: '2dsphere' }); // Create a special 2dsphere index on `City.location`
 
-  location: [pointSchema],
+const cafeSchema = new mongoose.Schema(
+  {
+    primaryImage: { type: String },
+    name: { type: String, required: true },
+    nameAr: { type: String },
+    slug: { type: String },
+    phone: { type: String },
+    email: { type: String },
+    album: {
+      type: [String],
+    },
+    desc: {
+      type: String,
+    },
+    descAr: {
+      type: String,
+    },
+    promoCodes: [String],
+    discounts: String,
+    ratingQuantity: {
+      type: Number,
+      default: 0,
+    },
+    likedBy: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
+    ratingAverage: {
+      type: Number,
+      default: 3.5,
+      min: [1, 'Rating must be above 1.0'],
+      max: [5, 'Rating must be below 5.0'],
+      set: (val) => Math.round(val * 10) / 10, // 4.666666, 46.66666, 47, 4.7
+    },
+    location: [pointSchema],
+  },
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+);
+
+cafeSchema.index({ slug: 1 });
+
+// VIRTUAL POPULATE
+cafeSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'cafe', //name of the field in the other model
+  localField: '_id',
+});
+
+// VIRTUAL POPULATE
+cafeSchema.virtual('menu', {
+  ref: 'Menu',
+  foreignField: 'cafe', //name of the field in the other model
+  localField: '_id',
 });
 
 cafeSchema.pre('save', function (next) {

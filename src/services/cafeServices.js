@@ -30,21 +30,32 @@ export default class CafeService {
 
   async updateCafe(param, body) {
     try {
-      const updatedCafe = await Cafe.findByIdAndUpdate({ slug: param }, body, {
+      const updatedCafe = await Cafe.findOneAndUpdate({ slug: param }, body, {
         new: true,
       });
       return updatedCafe;
     } catch (error) {
-      console.log(error);
+      return error;
     }
   }
 
   async deleteCafe(param) {
     try {
-      const deletedCafe = await Cafe.findByIdAndRemove({ slug: param });
+      const deletedCafe = await Cafe.findOneAndDelete({ slug: param });
       return deletedCafe;
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  async cafesWithin(radius, lng, lat) {
+    try {
+      const cafes = await Cafe.find({
+        location: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+      }).select('profileImage ratingAverage primaryImage name location');
+      return cafes;
+    } catch (error) {
+      return error;
     }
   }
 }
