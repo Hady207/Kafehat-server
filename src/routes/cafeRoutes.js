@@ -24,5 +24,6 @@ router
 
 router.use(authController.protect);
 router.post('/:cafe/favorite', cafeController.favorite);
+router.route('/distance/me').get(cafeController.getCafeCloseToUser);
 
 export default router;

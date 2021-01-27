@@ -26,6 +26,16 @@ export default class UserService {
     return user;
   }
 
+  async updateUser(userId, content) {
+    const updatedUser = await UserModal.findByIdAndUpdate(userId, content, {
+      new: true,
+    });
+    if (!updatedUser) {
+      return null;
+    }
+    return updatedUser;
+  }
+
   async getFavoriteList(id) {
     const user = await UserModal.findOne({ _id: id }).populate({
       path: 'favorites',

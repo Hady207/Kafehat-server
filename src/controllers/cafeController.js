@@ -78,3 +78,17 @@ exports.getCafesWithin = catchAsync(async (req, res, next) => {
   const cafes = await CafeService.cafesWithin(lng, lat, radius);
   createRespond(res, 200, cafes);
 });
+
+exports.getCafeCloseToUser = catchAsync(async (req, res, next) => {
+  console.log(req.user.location[0].coordinates);
+  const latlng = {
+    lat: req.user.location[0].coordinates[1],
+    lng: req.user.location[0].coordinates[0],
+  };
+  const closestCafes = await CafeService.cafesCloseToUser(latlng);
+  if (!closestCafes) {
+    next(new AppError(closestCafes.message, 400));
+  }
+  console.log(closestCafes);
+  createRespond(res, 200, closestCafes);
+});

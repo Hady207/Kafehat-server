@@ -8,7 +8,7 @@ router.route('/login').post(authController.login);
 router.route('/refreshToken').post(authController.refreshJWTToken);
 
 router.use(authController.protect);
-router.route('/me').get(userController.me);
+router.route('/me').get(userController.me).patch(userController.editProfile);
 router.route('/favorites').get(userController.favoritesList);
 
 export default router;

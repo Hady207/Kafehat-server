@@ -11,6 +11,7 @@ const pointSchema = new mongoose.Schema({
     type: [Number],
     required: true,
   },
+  description: String,
 });
 
 pointSchema.index({ index: '2dsphere' }); // Create a special 2dsphere index on `City.location`
