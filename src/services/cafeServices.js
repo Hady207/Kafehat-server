@@ -1,3 +1,4 @@
+import { userController } from '../controllers';
 import Cafe from '../models/Cafe';
 
 export default class CafeService {
@@ -54,6 +55,38 @@ export default class CafeService {
         location: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
       }).select('profileImage ratingAverage primaryImage name location');
       return cafes;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async cafesCloseToUser(userLocation) {
+    const { lng, lat } = userLocation;
+    const geoQuery = { type: 'Point', coordinates: [lng, lat] };
+    console.log(geoQuery);
+    try {
+      const distances = await Cafe.aggregate([
+        {
+          $geoNear: {
+            near: geoQuery,
+            distanceField: 'distance',
+            includeLocs: 'location.coordinates',
+            // maxDistance: 2400,//25km
+            spherical: true,
+
+            distanceMultiplier: 0.001,
+          },
+        },
+        {
+          $project: {
+            distance: 1,
+            name: 1,
+            slug: 1,
+            primaryImage: 1,
+          },
+        },
+      ]);
+      return distances;
     } catch (error) {
       return error;
     }

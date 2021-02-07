@@ -14,7 +14,7 @@ const pointSchema = new mongoose.Schema({
   description: String,
 });
 
-pointSchema.index({ index: '2dsphere' }); // Create a special 2dsphere index on `City.location`
+// pointSchema.index({ index: '2dsphere' }); // Create a special 2dsphere index on `City.location`
 
 const cafeSchema = new mongoose.Schema(
   {
@@ -58,6 +58,7 @@ const cafeSchema = new mongoose.Schema(
 );
 
 cafeSchema.index({ slug: 1 });
+cafeSchema.index({ location: '2dsphere' });
 
 // VIRTUAL POPULATE
 cafeSchema.virtual('reviews', {
