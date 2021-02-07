@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
     profileImage: String,
     username: String,
     name: String,
+    email: String,
     phone: String,
     password: {
       type: String,
@@ -31,7 +32,6 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
     },
-    email: String,
     favorites: [
       {
         type: mongoose.Schema.ObjectId,

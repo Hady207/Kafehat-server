@@ -1,7 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
-
-import { userRoutes, cafeRoutes, reviewRoutes } from '../routes';
+import cors from 'cors';
+import { authRoutes, cafeRoutes, reviewRoutes, userRoutes } from '../routes';
 import globalErrorHandler from '../controllers/errorController';
 import { AppError } from '../services';
 
@@ -10,7 +10,10 @@ const expressLoader = async ({ app }) => {
   //   app.head('/status', (req, res) => { res.status(200).end(); });
   //   app.enable('trust proxy');
 
-  //   app.use(cors());
+  // Implement CORS
+  app.use(cors());
+
+  app.options('*', cors());
 
   // Body parser, reading data from body into req.body
   app.use(require('morgan')('dev'));
@@ -19,7 +22,7 @@ const expressLoader = async ({ app }) => {
   app.use(cookieParser());
 
   // ...More middlewares
-
+  app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/cafes', cafeRoutes);
   app.use('/api/v1/reviews', reviewRoutes);
   app.use('/api/v1/users', userRoutes);

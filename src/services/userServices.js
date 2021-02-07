@@ -6,16 +6,22 @@ export default class UserService {
       const newUser = await UserModal.create(user);
       return newUser;
     } catch (error) {
-      console.log(error);
+      return error;
     }
   }
 
   async loginUser(email, password) {
-    const user = await UserModal.findOne({ email: email }).select('+password');
-    if (!user || !(await user.correctPassword(password, user.password))) {
-      return null;
+    try {
+      const user = await UserModal.findOne({ email: email }).select(
+        '+password'
+      );
+      if (!user || !(await user.correctPassword(password, user.password))) {
+        return null;
+      }
+      return user;
+    } catch (error) {
+      return error;
     }
-    return user;
   }
 
   async getUser(id) {

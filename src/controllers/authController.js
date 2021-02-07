@@ -40,9 +40,7 @@ const createSendToken = (user, statusCode, req, res) => {
       accessToken: token,
       refreshToken: refresh,
     },
-    result: {
-      user,
-    },
+    user,
   });
 };
 
@@ -56,19 +54,22 @@ exports.signup = catchAsync(async (req, res) => {
   createSendToken(createdUser, 201, req, res);
 });
 
-exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
-  // 1) Check if email and password exist
-  if (!email || !password) {
-    return next(new AppError('Please provide email and password', 400));
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    // 1) Check if email and password exist
+    if (!email || !password) {
+      return next(new AppError('Please provide email and password', 400));
+    }
+    const user = await UserInstance.loginUser(email, password);
+    if (!user) {
+      return next(new AppError('Incorrect email or password', 400));
+    }
+    createSendToken(user, 200, req, res);
+  } catch (error) {
+    return next(new AppError('something wrong happend', 400));
   }
-  const user = await UserInstance.loginUser(email, password);
-  if (!user) {
-    return next(new AppError('Incorrect email or password', 400));
-  }
-
-  createSendToken(user, 200, req, res);
-});
+};
 
 exports.logout = catchAsync(async (req, res, next) => {
   res.cookie('jwt', 'loggedout', {
@@ -95,7 +96,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   let token;
   if (
     req.headers.authorization &&
-    req.headers.authorization.startsWith('Bear')
+    req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
   } else if (req.cookies.jwt) {
@@ -149,9 +150,6 @@ exports.refreshJWTToken = catchAsync(async (req, res) => {
     secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
   });
   res.status(200).json({
-    status: 'success',
-    token: {
-      accessToken: token,
-    },
+    accessToken: token,
   });
 });

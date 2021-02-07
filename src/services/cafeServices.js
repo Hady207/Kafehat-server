@@ -15,7 +15,7 @@ export default class CafeService {
       const cafes = await Cafe.find({});
       return cafes;
     } catch (error) {
-      console.log(error);
+      return error;
     }
   }
 
@@ -24,7 +24,7 @@ export default class CafeService {
       const cafe = await Cafe.findOne({ slug: cafeName });
       return cafe;
     } catch (error) {
-      console.log(error);
+      return error;
     }
   }
 
@@ -44,7 +44,7 @@ export default class CafeService {
       const deletedCafe = await Cafe.findOneAndDelete({ slug: param });
       return deletedCafe;
     } catch (error) {
-      console.log(error);
+      return error;
     }
   }
 
