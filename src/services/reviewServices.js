@@ -2,50 +2,30 @@ import Review from '../models/Review';
 
 export default class reviewServices {
   async getAllReviewsCafe(cafeId) {
-    try {
-      const reviews = await Review.find({ cafe: cafeId });
-      return reviews;
-    } catch (error) {
-      return error;
-    }
+    const reviews = await Review.find({ cafe: cafeId });
+    return reviews;
   }
 
   async getAllReviewsUser(userId) {
-    try {
-      const reviews = await Review.find({ user: userId });
-      return reviews;
-    } catch (error) {
-      return error;
-    }
+    const reviews = await Review.find({ user: userId });
+    return reviews;
   }
 
   async createReview(content) {
-    try {
-      const createdReview = Review.create(content);
-      return createdReview;
-    } catch (error) {
-      return error;
-    }
+    const createdReview = Review.create(content);
+    return createdReview;
   }
 
   async updateReview(id, content) {
-    try {
-      const updatedReview = Review.findByIdAndUpdate(id, content, {
-        new: true,
-        runValidators: true,
-      });
-      return updatedReview;
-    } catch (error) {
-      return error;
-    }
+    const updatedReview = Review.findByIdAndUpdate(id, content, {
+      new: true,
+      runValidators: true,
+    });
+    return updatedReview;
   }
 
   async deleteReview(id) {
-    try {
-      const deleteReview = Review.findByIdAndDelete(id);
-      return deleteReview;
-    } catch (error) {
-      return error;
-    }
+    const deleteReview = Review.findByIdAndDelete(id);
+    return deleteReview;
   }
 }

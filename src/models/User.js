@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import validator from 'validator';
 
 const pointSchema = new mongoose.Schema({
   type: {
@@ -20,9 +21,23 @@ const userSchema = new mongoose.Schema(
   {
     profileImage: String,
     username: String,
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      validator: [validator.isEmail, `Please provide a valid email`],
+    },
     name: String,
-    email: String,
-    phone: String,
+    phone: {
+      type: String,
+      unique: true,
+      minlength: 8,
+      validator: [
+        validator.isMobilePhone,
+        'Please provide a valid mobile number',
+      ],
+    },
     password: {
       type: String,
       minlength: 8,
@@ -32,12 +47,24 @@ const userSchema = new mongoose.Schema(
       type: String,
       minlength: 8,
       select: false,
+      validate: {
+        validator: function (el) {
+          return el === this.password;
+        },
+        message: `Passwords are not the same`,
+      },
     },
     favorites: [
       {
         type: mongoose.Schema.ObjectId,
         ref: 'Cafe',
         required: [true, 'id must belong to a cafe'],
+      },
+    ],
+    friends: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
       },
     ],
     role: {
@@ -71,11 +98,22 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+// favorite List
 userSchema.methods.FavoriteList = async function (cafeId) {
   if (this.favorites.includes(cafeId)) {
     this.favorites.pull(cafeId);
   } else {
     this.favorites.push(cafeId);
+  }
+  return this.save({ validateBeforeSave: false });
+};
+
+// friends List
+userSchema.methods.FriendsList = function (userId) {
+  if (this.friends.includes(userId)) {
+    this.friends.pull(userId);
+  } else {
+    this.friends.push(userId);
   }
   return this.save({ validateBeforeSave: false });
 };

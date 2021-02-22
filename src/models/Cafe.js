@@ -58,7 +58,7 @@ const cafeSchema = new mongoose.Schema(
 );
 
 cafeSchema.index({ slug: 1 });
-cafeSchema.index({ location: '2dsphere' });
+cafeSchema.index({ 'location.coordinates': '2dsphere' });
 
 // VIRTUAL POPULATE
 cafeSchema.virtual('reviews', {

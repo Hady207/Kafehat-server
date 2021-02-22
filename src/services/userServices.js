@@ -2,30 +2,38 @@ import UserModal from '../models/User';
 
 export default class UserService {
   async createUser(user) {
-    try {
-      const newUser = await UserModal.create(user);
-      return newUser;
-    } catch (error) {
-      return error;
-    }
+    const newUser = await UserModal.create(user);
+    return newUser;
   }
 
   async loginUser(email, password) {
-    try {
-      const user = await UserModal.findOne({ email: email }).select(
-        '+password'
-      );
-      if (!user || !(await user.correctPassword(password, user.password))) {
-        return null;
-      }
-      return user;
-    } catch (error) {
-      return error;
+    const user = await UserModal.findOne({ email: email }).select('+password');
+    if (!user || !(await user.correctPassword(password, user.password))) {
+      return null;
     }
+    return user;
   }
 
-  async getUser(id) {
-    const user = await UserModal.findOne({ _id: id }).select('-password');
+  async getAllUsers() {
+    const users = await UserModal.find();
+    if (!users) {
+      return null;
+    }
+    return users;
+  }
+
+  async getUser(id, popOptions) {
+    const user = await UserModal.findOne({ _id: id })
+      .select('-password')
+      .populate(popOptions);
+    if (!user) {
+      return null;
+    }
+    return user;
+  }
+
+  async checkUserEmail(email) {
+    const user = await UserModal.findOne({ email });
     if (!user) {
       return null;
     }

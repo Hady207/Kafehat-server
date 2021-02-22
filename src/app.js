@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import socket from 'socket.io';
+
 import loaders from './loaders';
 import chatIo from './subscribers/Chat';
 // config() will read your .env file, parse the contents, assign it to process.env.

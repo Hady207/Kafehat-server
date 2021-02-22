@@ -1,11 +1,13 @@
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
 import { promisify } from 'util';
+import { OAuth2Client } from 'google-auth-library';
 
 import catchAsync from '../utils/catchAsync';
 import { UserServices, AppError } from '../services';
 
+// Instaces creation for UserDB and Google verify client
 const UserInstance = new UserServices();
+const Client = new OAuth2Client(process.env.GCLIENT);
 
 // Create the token
 const signToken = (id) => {
@@ -44,17 +46,45 @@ const createSendToken = (user, statusCode, req, res) => {
   });
 };
 
-exports.signup = catchAsync(async (req, res) => {
+// regular signup
+exports.signup = catchAsync(async (req, res, next) => {
   const createdUser = await UserInstance.createUser({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    confirmPassword: req.body.confirmPassword,
+    name: req.body?.name,
+    email: req.body?.email,
+    password: req.body?.password,
+    confirmPassword: req.body?.confirmPassword,
   });
   createSendToken(createdUser, 201, req, res);
 });
 
-exports.login = async (req, res, next) => {
+// signup using google credintals
+exports.googleSignin = catchAsync(async (req, res, next) => {
+  const userInfo = req.body.userInfo;
+  const ticket = await Client.verifyIdToken({ idToken: userInfo });
+  const { email, email_verified, picture, name } = ticket.getPayload();
+  const avaliableUser = await UserInstance.checkUserEmail(email);
+  if (email_verified && avaliableUser) {
+    createSendToken(avaliableUser, 200, req, res);
+  } else {
+    res.status(202).json({
+      status: 'success',
+      message: 'user is not avaliable on DB',
+      googleUser: {
+        name,
+        picture,
+        email,
+      },
+    });
+  }
+});
+
+// signup using facebook credintals
+exports.facebookSignin = async (req, res, next) => {
+  res.status(201).json({ status: 'sucess' });
+};
+
+// in app login
+exports.login = catchAsync(async (req, res, next) => {
   try {
     const { email, password } = req.body;
     // 1) Check if email and password exist
@@ -69,7 +99,7 @@ exports.login = async (req, res, next) => {
   } catch (error) {
     return next(new AppError('something wrong happend', 400));
   }
-};
+});
 
 exports.logout = catchAsync(async (req, res, next) => {
   res.cookie('jwt', 'loggedout', {
