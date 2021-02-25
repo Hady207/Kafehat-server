@@ -19,7 +19,7 @@ pointSchema.index({ index: '2dsphere' }); // Create a special 2dsphere index on 
 
 const userSchema = new mongoose.Schema(
   {
-    profileImage: String,
+    picture: String,
     username: String,
     email: {
       type: String,

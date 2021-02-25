@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 import { OAuth2Client } from 'google-auth-library';
+import Axios from 'axios';
 
 import catchAsync from '../utils/catchAsync';
 import { UserServices, AppError } from '../services';
@@ -9,13 +10,14 @@ import { UserServices, AppError } from '../services';
 const UserInstance = new UserServices();
 const Client = new OAuth2Client(process.env.GCLIENT);
 
-// Create the token
+// Create Acesses token
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
 
+// Create Refresh token
 const refreshToken = (id) => {
   return jwt.sign({ id: id }, process.env.RJWT_SECRET, {
     expiresIn: process.env.RJWT_EXPIRES_IN,
@@ -59,29 +61,41 @@ exports.signup = catchAsync(async (req, res, next) => {
 
 // signup using google credintals
 exports.googleSignin = catchAsync(async (req, res, next) => {
-  const userInfo = req.body.userInfo;
-  const ticket = await Client.verifyIdToken({ idToken: userInfo });
+  const { userInfo } = req.body;
+  const ticket = await Client.verifyIdToken({ idToken: userInfo.idToken });
   const { email, email_verified, picture, name } = ticket.getPayload();
   const avaliableUser = await UserInstance.checkUserEmail(email);
+
   if (email_verified && avaliableUser) {
     createSendToken(avaliableUser, 200, req, res);
   } else {
-    res.status(202).json({
-      status: 'success',
-      message: 'user is not avaliable on DB',
-      googleUser: {
-        name,
-        picture,
-        email,
-      },
+    const createdUser = await UserInstance.createUser({
+      name,
+      email,
+      picture,
     });
+    createSendToken(createdUser, 200, req, res);
   }
 });
 
 // signup using facebook credintals
-exports.facebookSignin = async (req, res, next) => {
-  res.status(201).json({ status: 'sucess' });
-};
+exports.facebookSignin = catchAsync(async (req, res, next) => {
+  const response = await Axios.get(
+    `https://graph.facebook.com/v5.0/me?fields=email,name,picture&access_token=${req.body.facebookId}`
+  );
+  const { email, name, picutre } = response.data;
+  const avaliableUser = await UserInstance.checkUserEmail(email);
+  if (avaliableUser) {
+    createSendToken(avaliableUser, 200, req, res);
+  } else {
+    const createdUser = await UserInstance.createUser({
+      name,
+      email,
+      picture: picture.url,
+    });
+    createSendToken(createdUser, 200, req, res);
+  }
+});
 
 // in app login
 exports.login = catchAsync(async (req, res, next) => {
