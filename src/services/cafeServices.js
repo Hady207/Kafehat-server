@@ -7,14 +7,12 @@ export default class CafeService {
     return createdCafe;
   }
 
-  async getAllCafes() {
-    const cafes = await Cafe.find({});
-    return cafes;
+  getAllCafes(skip = 0, limit = 0) {
+    return Cafe.find({}).skip(skip).limit(limit);
   }
 
-  async getOneCafe(cafeName) {
-    const cafe = await Cafe.findOne({ slug: cafeName });
-    return cafe;
+  getOneCafe(cafeName) {
+    return Cafe.findOne({ slug: cafeName });
   }
 
   async updateCafe(param, body) {

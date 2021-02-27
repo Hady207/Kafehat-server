@@ -7,9 +7,7 @@ const createRespond = (res, statuscode, doc) =>
   res.status(statuscode).json({
     status: 'success',
     [Array.isArray(doc) && 'count']: doc.length,
-    result: {
-      data: doc,
-    },
+    result: doc,
   });
 
 exports.createCafe = catchAsync(async (req, res, next) => {
